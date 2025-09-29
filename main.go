@@ -3,8 +3,10 @@ package main
 import (
 	"database/sql"
 	"log"
+	"net/http"
 	"os"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -34,7 +36,31 @@ func initDB() *sql.DB {
 	return connection
 }
 
+func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func GetProductHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func DeleteProductHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func main() {
 	var _ = initDB()
-	log.Println("starting go server")
+	r := mux.NewRouter()
+	r.HandleFunc("/create-product", CreateProductHandler).Methods("POST")
+	r.HandleFunc("/get-product", GetProductHandler).Methods("GET")
+	r.HandleFunc("/update-product", UpdateProductHandler).Methods("POST")
+	r.HandleFunc("/delete-product", DeleteProductHandler).Methods("DELETE")
+	log.Println("all handlers registered")
+
+	log.Fatal(http.ListenAndServe("0.0.0.0:8000", nil))
+
 }
