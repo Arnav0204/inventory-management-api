@@ -36,31 +36,16 @@ func initDB() *sql.DB {
 	return connection
 }
 
-func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func GetProductHandler(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func DeleteProductHandler(w http.ResponseWriter, r *http.Request) {
-
-}
-
 func main() {
-	var _ = initDB()
+	connection := initDB()
+	srv := &Server{DB: connection}
 	r := mux.NewRouter()
-	r.HandleFunc("/create-product", CreateProductHandler).Methods("POST")
-	r.HandleFunc("/get-product", GetProductHandler).Methods("GET")
-	r.HandleFunc("/update-product", UpdateProductHandler).Methods("POST")
-	r.HandleFunc("/delete-product", DeleteProductHandler).Methods("DELETE")
+	r.HandleFunc("/create-product", srv.CreateProductHandler).Methods("POST")
+	r.HandleFunc("/get-product", srv.GetProductHandler).Methods("GET")
+	r.HandleFunc("/update-product", srv.UpdateProductHandler).Methods("POST")
+	r.HandleFunc("/delete-product", srv.DeleteProductHandler).Methods("DELETE")
 	log.Println("all handlers registered")
 
-	log.Fatal(http.ListenAndServe("0.0.0.0:8000", nil))
+	log.Fatal(http.ListenAndServe("0.0.0.0:8000", r))
 
 }
