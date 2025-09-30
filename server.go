@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type Server struct {
@@ -102,5 +104,37 @@ func (srv *Server) UpdateProductHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (srv *Server) DeleteProductHandler(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	productId := params["id"]
+	if productId == "0" || productId == "" {
+		http.Error(w, "Missing productid in request", http.StatusBadRequest)
+		return
+	}
+	result, err := srv.DB.Exec(
+		`DELETE FROM products 
+		WHERE
+         product_id = $1`,
+		productId,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+		http.Error(w, "Error in deleting product from database", http.StatusInternalServerError)
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		http.Error(w, "Failed to check deleted row", http.StatusInternalServerError)
+		return
+	}
+	if rowsAffected == 0 {
+		http.Error(w, "Product not found", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "product deleted successfully",
+	})
 
 }
