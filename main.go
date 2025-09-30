@@ -42,6 +42,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/create-product", srv.CreateProductHandler).Methods("POST")
 	r.HandleFunc("/get-product", srv.GetProductHandler).Methods("GET")
+	r.HandleFunc("/get-product/{id}", srv.GetProductByIdHandler).Methods("GET")
 	r.HandleFunc("/update-product", srv.UpdateProductHandler).Methods("POST")
 	r.HandleFunc("/delete-product/{id}", srv.DeleteProductHandler).Methods("DELETE")
 	log.Println("all handlers registered")

@@ -39,6 +39,7 @@ func (srv *Server) CreateProductHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (srv *Server) GetProductHandler(w http.ResponseWriter, r *http.Request) {
+
 	rows, err := srv.DB.Query(`SELECT product_id, product_name, product_quantity, product_description 
 								 FROM products`)
 	if err != nil {
@@ -60,6 +61,34 @@ func (srv *Server) GetProductHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(products)
+}
+
+func (srv *Server) GetProductByIdHandler(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	productId := params["id"]
+	if productId == "0" || productId == "" {
+		http.Error(w, "Missing productid in request", http.StatusBadRequest)
+		return
+	}
+
+	var product Product
+	row := srv.DB.QueryRow(`
+		SELECT product_id,product_name,product_quantity,product_description 
+		FROM products
+		WHERE product_id = $1`,
+		productId,
+	)
+
+	err := row.Scan(&product.ProductId, &product.ProductName, &product.ProductQuantity, &product.ProductDescription)
+	if err != nil {
+		log.Fatal("unable to scan row")
+		http.Error(w, "unable to scan fetched row", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "Application/json")
+	json.NewEncoder(w).Encode(product)
+
 }
 
 func (srv *Server) UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +126,6 @@ func (srv *Server) UpdateProductHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Return updated product
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(productRequest)
 
